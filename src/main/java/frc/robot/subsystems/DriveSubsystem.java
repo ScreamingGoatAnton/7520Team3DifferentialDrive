@@ -10,6 +10,7 @@ import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -45,6 +46,8 @@ public class DriveSubsystem extends SubsystemBase {
     private final SparkMaxSim m_leftMotorSim;
     private final SparkMaxSim m_rightMotorSim;
 
+    private final SparkMaxConfig globalConfig;
+
     private final StructPublisher<Pose2d> m_publisher;
 
     // TODO: Insert your drive motors and differential drive here...
@@ -52,9 +55,14 @@ public class DriveSubsystem extends SubsystemBase {
     /** Creates a new DriveSubsystem. */
     public DriveSubsystem() {
 
+        globalConfig = new SparkMaxConfig();
+        globalConfig.idleMode(IdleMode.kBrake);
+        globalConfig.smartCurrentLimit(50);
 
         m_leftLeaderMotor = new SparkMax(1, MotorType.kBrushless);
         m_rightLeaderMotor = new SparkMax(2, MotorType.kBrushless);
+        m_leftLeaderMotor.configure(globalConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        m_rightLeaderMotor.configure(globalConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
         m_driveSim = DifferentialDrivetrainSim.createKitbotSim(
                 KitbotMotor.kDoubleNEOPerSide,
@@ -80,7 +88,7 @@ public class DriveSubsystem extends SubsystemBase {
 
 
     public void drive(double drive, double heading) {
-        m_drive.arcadeDrive(drive, heading);
+        m_drive.arcadeDrive(heading/2, drive/2);
     }
 
     public Pose2d getPose() {
